@@ -1,0 +1,61 @@
+<html>
+<body>
+
+<div id = "msg"></div>
+
+<script>
+
+// sleep for <dur> millisec
+// use like "await sleep( 1000);" in "async" function
+function sleep( dur) {
+  return new Promise(
+    ( resolve) => {
+      setTimeout( resolve, dur);
+    } 
+  );
+}
+
+let msg_id = document.getElementById( "msg");
+
+async function f()
+{
+
+  let result = NaN;
+  let finished = false;
+
+  msg_id.innerText = "not yet..";
+
+  WebAssembly.instantiateStreaming(
+    fetch( "test01.wasm"), {})
+      .then( wasm => {
+        let add_func = wasm.instance.exports.add;
+        result = add_func(10, 20);
+        console.log( result);
+        finished = true;
+      }
+  );
+
+  console.log( "out of instantiateStreaming()");
+
+  console.log( result);
+
+  msg_id.innerText = "Now computing...";
+
+  while( finished == false){
+    await sleep( 100);
+  }
+
+  console.log( "after finished");
+
+  console.log( result);
+
+  msg_id.innerText = result;
+
+}
+
+f();
+
+</script>
+
+</body>
+</html>
