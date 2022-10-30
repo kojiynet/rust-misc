@@ -1,15 +1,17 @@
 
 <!--
-  test03.html
+
+  ※ダメな例。
+
+  test03b.html
   for rust/test03
 
   Cargoを使ってコンパイルしてみた。
     test03/src/lib.rs　参照。
 
   HTML/JS側では、WASM関数処理を待つために、test01では複雑に書いてsleepしていたが、そこを単純化した。
-  
-  ※async init()にWASM関数取得を書いてほかはasyncなしでいいか、と思ったが、やってみたらできなかった。
-  　test03b.html　参照。
+  init()つくってみる。
+  →無理。
 
 -->
 
@@ -20,18 +22,26 @@
 <div id = "msg">(now calculating...)</div>
 
 <script>
-(async function(){ // もう、script部分は丸ごとasyncありきで。。。
+
+async function init()
+{
 
   // 画面要素のIDの取得
-  let msg_id = document.getElementById( "msg");
+  msg_id = document.getElementById( "msg");
 
   // WASM関数の取得
   let wasm = await WebAssembly.instantiateStreaming( fetch( "test03.wasm"), {});
-  let wasm_add = wasm.instance.exports.add;
+  wasm_add = wasm.instance.exports.add;
 
-  msg_id.innerText = wasm_add( 10, 20);
+}
 
-})();
+let msg_id;
+let wasm_add;
+
+init(); // defined above
+
+msg_id.innerText = wasm_add( 10, 20);
+
 </script>
 
 </body>
