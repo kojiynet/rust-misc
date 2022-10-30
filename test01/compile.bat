@@ -1,0 +1,1 @@
+rustc --target wasm32-unknown-unknown ./test01.rs 
