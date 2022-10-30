@@ -1,0 +1,35 @@
+
+<!--
+  test03.html
+  for rust/test03
+
+  Cargoを使ってコンパイルしてみた。
+    test03/src/lib.rs　参照。
+
+  HTML/JS側では、WASM関数処理を待つために、test01では複雑に書いてsleepしていたが、そこを単純化した。
+
+-->
+
+<html>
+<body>
+
+<div>add( 10, 20) = </div>
+<div id = "msg">(now calculating...)</div>
+
+<script>
+(async function(){ // もう、script部分は丸ごとasyncありきで。。。
+
+  // 画面要素のIDの取得
+  let msg_id = document.getElementById( "msg");
+
+  // WASM関数の取得
+  let wasm = await WebAssembly.instantiateStreaming( fetch( "test03.wasm"), {});
+  let wasm_add = wasm.instance.exports.add;
+
+  msg_id.innerText = wasm_add( 10, 20);
+
+})();
+</script>
+
+</body>
+</html>
