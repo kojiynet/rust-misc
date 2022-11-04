@@ -1,7 +1,7 @@
 
 /*
 
-test04/main.rs
+test04/src/main.rs
 
 test02を改造する。
 Beta分布のCDFの逆関数を出してみる。
@@ -9,6 +9,8 @@ Beta分布のCDFの逆関数を出してみる。
 Beta( 0.5, 0.5)のInvCDF(0.01)は、
 Rustだと
 　0.000274658203125
+C++ (Boost)だと
+　0.00024672
 Rだと
 　> qbeta( 0.01, 0.5, 0.5)
 　[1] 0.0002467198
@@ -16,7 +18,9 @@ Excelだと
 　=BETA.INV(0.01,0.5,0.5)
 　0.00024672
 
-→Rustの精度が低い？
+→RustのCDFに入れなおしても誤差がある。
+
+→RustのInverseCDFの精度が低い？
 
 
 cargoでつくるとき：
@@ -38,15 +42,23 @@ fn main()
 
     println!("z = InvCDF(p) for Beta(alpha,beta)");
 
-    let alpha = 0.5;
-    let beta = 0.5;
-    let dist = Beta::new( alpha, beta).unwrap();
+    println!( "alpha\tbeta\tp\tz\tcalculated_p\tabserr");
 
-    println!( "alpha\tbeta\tp\tz");
-    for pby100 in 1..=99 {
-        let p = ( pby100 as f64) / 100.0;
-        let z = dist.inverse_cdf( p);
-        println!( "{alpha}\t{beta}\t{p}\t{z}");
+    for a_int in 1..=4 {
+        for b_int in 1..=4 {
+
+            let alpha = ( a_int as f64) * 0.5;
+            let beta = ( b_int as f64) * 0.5;
+            let dist = Beta::new( alpha, beta).unwrap();
+            for pby100 in 1..=99 {
+                let p = ( pby100 as f64) / 100.0;
+                let z = dist.inverse_cdf( p);
+                let calculated_p = dist.cdf( z);
+                let abserr = ( p - calculated_p).abs();
+                println!( "{alpha}\t{beta}\t{p}\t{z}\t{calculated_p}\t{abserr}");
+            }
+
+        }
     }
 
 }
