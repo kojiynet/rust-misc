@@ -19,11 +19,11 @@ use statrs::distribution::ContinuousCDF;
 fn main()
 {
 
-    println!("p value; CDF(0.975) for N(0,1)");
+    println!("Calculating InverseCDF(0.975) for N(0,1)");
 
     let n = Normal::new(0.0, 1.0).unwrap();
-    let p = n.inverse_cdf( 0.975);
+    let z = n.inverse_cdf( 0.975);
 
-    println!("p = {p}");
+    println!("z = {z}");
 
 }
