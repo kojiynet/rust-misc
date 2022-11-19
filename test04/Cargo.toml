@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 statrs = "0.16"
+probability = "0.20.1"

@@ -3,25 +3,16 @@
 
 test04/src/main.rs
 
-test02を改造する。
-Beta分布のCDFの逆関数を出してみる。
+Beta分布のCDFを出してみる。
 
-Beta( 0.5, 0.5)のInvCDF(0.01)は、
-Rustだと
-　0.000274658203125
-C++ (Boost)だと
-　0.00024672
-Rだと
-　> qbeta( 0.01, 0.5, 0.5)
-　[1] 0.0002467198
-Excelだと
-　=BETA.INV(0.01,0.5,0.5)
-　0.00024672
+Beta( 0.5, 0.5)のCDF(0.01)は、
 
-→RustのCDFに入れなおしても誤差がある。
+Rust (crate: statr) だと
+　0.06376856085851985
+Rust (crate: probability) だと
+　0.06376856085851985
 
-→RustのInverseCDFの精度が低い？
-
+→その他の場合も、Rustのstatrとprobabilityはほぼ等しい。
 
 cargoでつくるとき：
 　cargo new XXX
@@ -33,32 +24,59 @@ XXXの中のCargo.tomlにある[dependencies]以下に、追加で必要なcrate
 
 */
 
-use statrs::distribution::Beta;
-use statrs::distribution::ContinuousCDF;
-// use statrs::distribution::Normal;
-
 fn main()
 {
 
-    println!("z = InvCDF(p) for Beta(alpha,beta)");
+    let alpha_array = [ 0.5, 1.0, 1.5, 2.0];
+    let beta_array = alpha_array;
+    
+    println!( "Test for CDF() of Beta(alpha,beta)");
+    println!( " p_hat = CDF(z) for various z values");
+    println!();
+    println!( "Test two crates; \"1\" means \"statrs\" crate, \"2\" means \"probability\" crate");
+    println!();
 
-    println!( "alpha\tbeta\tp\tz\tcalculated_p\tabserr");
+    println!( "alpha\tbeta\tz\tp_hat_1\tp_hat_2");
 
-    for a_int in 1..=4 {
-        for b_int in 1..=4 {
+    for alpha in alpha_array {
+        for beta in beta_array {
+            for zby100 in 1..=99 {
+                
+                let z = ( zby100 as f64) / 100.0;
 
-            let alpha = ( a_int as f64) * 0.5;
-            let beta = ( b_int as f64) * 0.5;
-            let dist = Beta::new( alpha, beta).unwrap();
-            for pby100 in 1..=99 {
-                let p = ( pby100 as f64) / 100.0;
-                let z = dist.inverse_cdf( p);
-                let calculated_p = dist.cdf( z);
-                let abserr = ( p - calculated_p).abs();
-                println!( "{alpha}\t{beta}\t{p}\t{z}\t{calculated_p}\t{abserr}");
+                let p_hat_1 = beta_cdf_statrs_crate( alpha, beta, z);
+                let p_hat_2 = beta_cdf_prob_crate( alpha, beta, z);
+
+                println!( "{alpha}\t{beta}\t{z}\t{p_hat_1}\t{p_hat_2}");
+
             }
-
         }
     }
+
+}
+
+fn beta_cdf_statrs_crate( alpha: f64, beta: f64, z: f64) -> f64 
+{
+
+    use statrs::distribution::Beta;
+    use statrs::distribution::ContinuousCDF;
+
+    let dist = Beta::new( alpha, beta).unwrap();
+    let p_hat = dist.cdf( z);
+
+    return p_hat;
+
+}
+
+fn beta_cdf_prob_crate( alpha: f64, beta: f64, z: f64) -> f64
+{
+
+    use probability::distribution::Beta;
+    use probability::distribution::Distribution;
+
+    let dist = Beta::new( alpha, beta, 0.0, 1.0);
+    let p_hat = dist.distribution( z);
+
+    return p_hat;
 
 }
