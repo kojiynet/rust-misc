@@ -1,0 +1,76 @@
+
+<!--
+
+  test07.html
+  for rust/test07
+
+-->
+
+<!DOCTYPE html>
+
+<html lang = "ja">
+
+<head>
+  <meta charset = "UTF-8">
+  <title>
+  Beta Dist InvCDF Calculator using WASM - Rust - Library "probability"
+  </title>
+</head>
+
+<body>
+
+<div>Beta Dist InvCDF Calculator</div>
+<div>using WASM / Rust - Library "probability"</div>
+
+<br>
+
+<div>Parameter Alpha: <input id = "inputAlpha" type = "text" size = "10" value = "2.0"></div>
+<div>Parameter Beta: <input id = "inputBeta" type = "text" size = "10" value = "2.0"></div>
+<div>Argument p: <input id = "inputP" type = "text" size = "10" value = "0.5"></div>
+<div><button id = "calcButton">Calculate</button><div>
+
+<br>
+
+<div>Result:</div>
+<div id = "specMsg">(not specified yet...)</div>
+<div id = "ansMsg">(not calculated yet...)</div>
+
+<script>
+(async function(){ // もう、script部分は丸ごとasyncありきで。。。
+
+  // 画面要素のIDの取得
+  let inputAlpha = document.getElementById( "inputAlpha");
+  let inputBeta = document.getElementById( "inputBeta");
+  let inputP = document.getElementById( "inputP");
+  let calcButton = document.getElementById( "calcButton");
+  let specMsg = document.getElementById( "specMsg");
+  let ansMsg = document.getElementById( "ansMsg");
+
+  // WASM関数の取得
+  let wasm = await WebAssembly.instantiateStreaming( fetch( "test07.wasm"), {});
+  let beta_invcdf = wasm.instance.exports.beta_invcdf;
+
+  // Calculateボタンが押されたら、答えを返す。
+  calcButton.addEventListener(
+    "click", 
+    function(){
+      let alpha = Number( inputAlpha.value);
+      let beta = Number( inputBeta.value);
+      let p = Number( inputP.value);
+      specMsg.innerText = "Alpha=" + inputAlpha.value + " Beta=" + inputBeta.value + " p=" + inputP.value;
+      if ( Number.isNaN( alpha) == false && alpha > 0 &&
+           Number.isNaN( beta) == false && beta > 0 &&
+           Number.isNaN( p) == false && p >= 0 && p <= 1){
+        ansMsg.innerText = beta_invcdf( alpha, beta, p);
+      } else {
+        ansMsg.innerText = "(Error)";
+      }
+    }
+  );
+
+})();
+</script>
+
+</body>
+
+</html>
